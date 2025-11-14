@@ -1,40 +1,37 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Page() {
-  // LISTA DE EXERCÍCIOS
-  const initial = [
-    { id: 1, text: "Supino reto" },
-    { id: 2, text: "Supino inclinado" },
-    { id: 3, text: "Crossover" },
-    { id: 4, text: "Tríceps testa" },
-    { id: 5, text: "Tríceps corda" },
-    { id: 6, text: "Fundos na paralela" }
-  ];
+  const [tasks, setTasks] = useState([
+    { id: 1, text: "Supino reto", done: false },
+    { id: 2, text: "Supino inclinado", done: false },
+    { id: 3, text: "Crossover", done: false },
+    { id: 4, text: "Tríceps testa", done: false },
+    { id: 5, text: "Tríceps corda", done: false },
+    { id: 6, text: "Fundos na paralela", done: false },
+  ]);
 
-  const [items, setItems] = useState(initial);
+  const toggle = id =>
+    setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
 
-  const toggleItem = (id) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, done: !item.done } : item
-      )
-    );
-  };
+  return (
+    <main className="p-6 max-w-lg mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Só Vai</h1>
 
-  // TIMER
-  const [seconds, setSeconds] = useState(0);
-  const [running, setRunning] = useState(false);
-
-  useEffect(() => {
-    let interval = null;
-    if (running) {
-      interval = setInterval(() => {
-        setSeconds((s) => s + 1);
-      }, 1000);
-    } else if (!running && seconds !== 0) {
-      clearInterval(interval);
+      <ul className="space-y-3">
+        {tasks.map(t => (
+          <li
+            key={t.id}
+            onClick={() => toggle(t.id)}
+            className={`cursor-pointer p-3 border rounded ${t.done ? "line-through opacity-60" : ""}`}
+          >
+            {t.text}
+          </li>
+        ))}
+      </ul>
+    </main>
+  );
+}      clearInterval(interval);
     }
     return () => clearInterval(interval);
   }, [running]);
