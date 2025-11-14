@@ -1,61 +1,89 @@
-"use client"; import { useState, useEffect } from "react";
+"use client";
 
-// Simple timer hook function useTimer() { const [seconds, setSeconds] = useState(0); const [running, setRunning] = useState(false);
+import { useState, useEffect } from "react";
 
-useEffect(() => { if (!running) return; const id = setInterval(() => setSeconds((s) => s + 1), 1000); return () => clearInterval(id); }, [running]);
+export default function Page() {
+  // LISTA DE EXERCÍCIOS
+  const initial = [
+    { id: 1, text: "Supino reto" },
+    { id: 2, text: "Supino inclinado" },
+    { id: 3, text: "Crossover" },
+    { id: 4, text: "Tríceps testa" },
+    { id: 5, text: "Tríceps corda" },
+    { id: 6, text: "Fundos na paralela" }
+  ];
 
-const start = () => setRunning(true); const stop = () => setRunning(false); const reset = () => { setRunning(false); setSeconds(0); };
+  const [items, setItems] = useState(initial);
 
-return { seconds, start, stop, reset, running }; }
+  const toggleItem = (id) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, done: !item.done } : item
+      )
+    );
+  };
 
-export default function Page() { const initial = [ { id: 1, text: "Supino reto" }, { id: 2, text: "Supino inclinado" }, { id: 3, text: "Crossover" }, { id: 4, text: "Tríceps testa" }, { id: 5, text: "Tríceps corda" }, { id: 6, text: "Fundos na paralela" } ];
+  // TIMER
+  const [seconds, setSeconds] = useState(0);
+  const [running, setRunning] = useState(false);
 
-const [checks, setChecks] = useState<Record<number, boolean>>({}); const { seconds, start, stop, reset, running } = useTimer();
+  useEffect(() => {
+    let interval = null;
+    if (running) {
+      interval = setInterval(() => {
+        setSeconds((s) => s + 1);
+      }, 1000);
+    } else if (!running && seconds !== 0) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [running]);
 
-// Load from localStorage useEffect(() => { const saved = localStorage.getItem("trainingChecks"); if (saved) setChecks(JSON.parse(saved)); }, []);
+  const start = () => setRunning(true);
+  const stop = () => setRunning(false);
+  const reset = () => {
+    setRunning(false);
+    setSeconds(0);
+  };
 
-// Persist useEffect(() => { localStorage.setItem("trainingChecks", JSON.stringify(checks)); }, [checks]);
+  return (
+    <main className="p-6 max-w-xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Só Vai</h1>
 
-const toggle = (id: number) => { setChecks((prev) => ({ ...prev, [id]: !prev[id] })); };
+      {/* CHECKLIST */}
+      <div className="space-y-4 mb-8">
+        {items.map((item) => (
+          <div
+            key={item.id}
+            onClick={() => toggleItem(item.id)}
+            className={`p-4 rounded-lg cursor-pointer border ${
+              item.done ? "bg-green-600 border-green-700" : "bg-gray-800 border-gray-700"
+            }`}
+          >
+            {item.text}
+          </div>
+        ))}
+      </div>
 
-const resetAll = () => { setChecks({}); reset(); };
+      {/* TIMER */}
+      <div className="text-center">
+        <div className="text-4xl font-bold mb-4">
+          {String(Math.floor(seconds / 60)).padStart(2, "0")}:
+          {String(seconds % 60).padStart(2, "0")}
+        </div>
 
-const format = (s: number) => { const m = Math.floor(s / 60).toString().padStart(2, "0"); const sec = (s % 60).toString().padStart(2, "0"); return ${m}:${sec}; };
-
-return ( <main className="min-h-screen bg-neutral-900 text-white p-6 max-w-md mx-auto space-y-6"> <h1 className="text-2xl font-bold">Treino Peito + Tríceps</h1>
-
-<section className="space-y-3">
-    {initial.map((item) => (
-      <label
-        key={item.id}
-        className="flex items-center gap-3 bg-neutral-800 p-3 rounded-lg cursor-pointer select-none"
-      >
-        <input
-          type="checkbox"
-          checked={!!checks[item.id]}
-          onChange={() => toggle(item.id)}
-        />
-        <span>{item.text}</span>
-      </label>
-    ))}
-  </section>
-
-  <section className="space-y-3 pt-4">
-    <div className="text-xl font-mono text-center">{format(seconds)}</div>
-    <div className="flex gap-3 justify-center">
-      {!running && (
-        <button onClick={start} className="bg-green-600 px-4 py-2 rounded-lg">Start</button>
-      )}
-      {running && (
-        <button onClick={stop} className="bg-yellow-600 px-4 py-2 rounded-lg">Stop</button>
-      )}
-      <button onClick={reset} className="bg-blue-600 px-4 py-2 rounded-lg">Reset Timer</button>
-    </div>
-  </section>
-
-  <button onClick={resetAll} className="w-full bg-red-700 py-3 rounded-lg mt-6">
-    Resetar Tudo
-  </button>
-</main>
-
-); }
+        <div className="flex justify-center gap-4">
+          <button onClick={start} className="px-4 py-2 bg-blue-600 rounded">
+            Start
+          </button>
+          <button onClick={stop} className="px-4 py-2 bg-yellow-600 rounded">
+            Stop
+          </button>
+          <button onClick={reset} className="px-4 py-2 bg-red-600 rounded">
+            Reset
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+              }
